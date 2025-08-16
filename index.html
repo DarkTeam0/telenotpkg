@@ -1,195 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Referral & OTP System</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Courier New', monospace;
-    background-color: #0d0d0d;
-    color: #00ff00;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-  }
-  h1 {
-    font-size: 2.5em;
-    text-shadow: 0 0 5px #0f0,0 0 10px #0f0,0 0 20px #0f0;
-    margin-bottom: 30px;
-  }
-  button {
-    background: linear-gradient(90deg,#00ff00,#00aa00);
-    border: none;
-    padding: 15px 40px;
-    font-size: 20px;
-    color: #0d0d0d;
-    cursor: pointer;
-    border-radius: 10px;
-    margin: 10px;
-    transition: 0.3s;
-  }
-  button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px #0f0,0 0 40px #0f0 inset;
-  }
-  input {
-    padding: 10px;
-    font-size: 18px;
-    border-radius: 8px;
-    border: none;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  #otpDisplay {
-    font-size: 50px;
-    letter-spacing: 10px;
-    margin-top: 20px;
-    font-weight: bold;
-    text-shadow: 0 0 10px #0f0,0 0 20px #0f0,0 0 40px #0f0;
-    animation: glow 1.5s infinite alternate;
-  }
-  @keyframes glow {
-    from { text-shadow: 0 0 10px #0f0,0 0 20px #0f0;}
-    to { text-shadow: 0 0 20px #0f0,0 0 40px #0f0,0 0 60px #0f0;}
-  }
-  #telegramBtn {
-    background: #0088cc;
-    color: #fff;
-  }
-  a {
-    color: #00ff00;
-    text-decoration: none;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>AkMods Referral + OTP System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      max-width: 400px;
+      margin: auto;
+      background: rgba(0,0,0,0.5);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0px 0px 20px #000;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      background: #ff512f;
+      color: white;
+      transition: 0.3s;
+    }
+    button:hover { background: #dd2476; }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    #telegramBtn {
+      background: #0088cc;
+    }
+  </style>
 </head>
-<body>
+<body onload="checkReferral()">
 
-<!-- Referral Page -->
-<div id="referralPage">
-  <h1>Referral System</h1>
-  <p id="counter">0/3 referrals completed</p>
-  <p>
-    <a id="refLink" href="#" target="_blank">Your referral link will appear here</a>
-  </p>
-  <button onclick="showReferralLink()">Generate My Referral Link</button>
-  <button onclick="copyReferralLink()">Copy Referral Link</button>
-  <button id="telegramBtn" onclick="openTelegram()">Join Telegram</button>
-</div>
+  <!-- Referral Page -->
+  <div id="referralPage" class="card">
+    <h1>Referral System</h1>
+    <p id="counter">0/3 referrals completed</p>
+    <p>
+      <a id="refLink" href="#" target="_blank" style="color:#4cafef;">Referral link yaha show hoga</a>
+    </p>
+    <button onclick="showReferralLink()">Generate My Referral Link</button>
+    <button onclick="copyReferralLink()">Copy Referral Link</button>
+    <button id="telegramBtn" onclick="openTelegram()">Join Telegram</button>
+  </div>
 
-<script>
-function showReferralLink() {
-    let code = localStorage.getItem('myReferralCode') || generateReferralCode();
-    let link = window.location.origin + window.location.pathname + '?ref=' + code;
-    document.getElementById('refLink').innerText = link;
-    document.getElementById('refLink').href = link;
-    localStorage.setItem('myReferralLink', link);
-}
+  <!-- Number Page -->
+  <div id="numberPage" class="card" style="display:none;">
+    <h2>Enter Your Number</h2>
+    <input type="text" id="phone" placeholder="Enter number">
+    <br>
+    <button onclick="goToOtp()">Continue</button>
+  </div>
 
-// ✅ Copy Referral Link function
-function copyReferralLink() {
-    let link = localStorage.getItem('myReferralLink');
-    if(!link){
-        alert("Pehle referral link generate karo!");
-        return;
-    }
-    navigator.clipboard.writeText(link).then(() => {
-        alert("Referral link copied: " + link);
-    }).catch(err => {
-        console.error("Copy failed:", err);
-    });
-}
-</script>
-
-<!-- Number Page -->
-<div id="numberPage" style="display:none;">
-  <h1>Enter Your Number</h1>
-  <input type="text" id="phoneNumber" placeholder="Enter Number">
-  <button onclick="goToOTP()">Continue</button>
-  <button id="telegramBtn" onclick="openTelegram()">Join Telegram</button>
-</div>
-
-<!-- OTP Page -->
-<div id="otpPage" style="display:none;">
-  <h1>OTP Generator</h1>
-  <button onclick="generateOTP()">Generate OTP</button>
-  <div id="otpDisplay">------</div>
-  <p>Copy this OTP to main site</p>
-  <button id="telegramBtn" onclick="openTelegram()">Join Telegram</button>
-</div>
+  <!-- OTP Generator Page -->
+  <div id="otpPage" class="card" style="display:none;">
+    <h2>Generate OTP</h2>
+    <button onclick="generateOtp()">Generate OTP</button>
+    <p id="generatedOtp" style="font-size:20px; margin-top:10px;"></p>
+    <input type="text" id="otpInput" placeholder="Enter OTP">
+    <br>
+    <button onclick="verifyOtp()">Verify OTP</button>
+  </div>
 
 <script>
-// === Referral link check & counter ===
 let referralCount = parseInt(localStorage.getItem('refCount') || 0);
+let myCode = localStorage.getItem('myReferralCode');
+let currentOtp = "";
 
-// Generate unique referral code for current user
+// generate referral code
 function generateReferralCode() {
-    let code = 'REF' + Math.floor(1000 + Math.random() * 9000);
-    localStorage.setItem('myReferralCode', code);
-    return code;
+  let code = 'REF' + Math.floor(Math.random() * 10000);
+  localStorage.setItem('myReferralCode', code);
+  return code;
 }
 
-// Show referral link
+// show referral link
 function showReferralLink() {
-    let code = localStorage.getItem('myReferralCode') || generateReferralCode();
-    let link = window.location.origin + window.location.pathname + '?ref=' + code;
-    document.getElementById('refLink').innerText = link;
-    document.getElementById('refLink').href = link;
+  let code = localStorage.getItem('myReferralCode') || generateReferralCode();
+  let link = "https://akmods-akhackers-projects.vercel.app/?ref=" + code;
+  document.getElementById('refLink').innerText = link;
+  document.getElementById('refLink').href = link;
+  localStorage.setItem('myReferralLink', link);
 }
 
-// Check if someone came via referral
-function checkReferral() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get('ref');
-    if(ref){
-        console.log("Referral detected: ", ref);
-        addReferral();
-    } else if(!localStorage.getItem('myReferralCode')){
-        alert("Open via referral link only!");
-        window.location.href = "https://akmods-akhackers-projects.vercel.app/";
-    }
-}
-checkReferral();
-
-// Increment referral counter
-function addReferral() {
-    referralCount++;
-    localStorage.setItem('refCount', referralCount);
-    document.getElementById('counter').innerText = referralCount + "/3 referrals completed";
-    if(referralCount >= 3){
-        alert("3 referrals complete! Continue to number page.");
-        document.getElementById('referralPage').style.display = "none";
-        document.getElementById('numberPage').style.display = "block";
-    }
-}
-
-// === Number page to OTP page ===
-function goToOTP() {
-  let number = document.getElementById('phoneNumber').value;
-  if(number.length < 5){
-    alert("Enter a valid number!");
+// copy referral link
+function copyReferralLink() {
+  let link = localStorage.getItem('myReferralLink');
+  if(!link){
+    alert("Pehle referral link generate karo!");
     return;
   }
-  localStorage.setItem('userNumber', number);
+  navigator.clipboard.writeText(link).then(() => {
+    alert("Referral link copied: " + link);
+  });
+}
+
+// add referral
+function addReferral() {
+  referralCount++;
+  localStorage.setItem('refCount', referralCount);
+  document.getElementById('counter').innerText = referralCount + "/3 referrals completed";
+  if(referralCount >= 3){
+    alert("3 referrals complete! Continue to number page.");
+    document.getElementById('referralPage').style.display = "none";
+    document.getElementById('numberPage').style.display = "block";
+  }
+}
+
+// check referral on load
+function checkReferral() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const ref = urlParams.get('ref');
+  myCode = localStorage.getItem('myReferralCode');
+
+  if(ref){
+    console.log("Referral detected: ", ref);
+    addReferral();
+  } else if(myCode) {
+    console.log("Apna referral code hai, allowed");
+  } else {
+    alert("Access Denied! Referral link se hi open karein.");
+    window.location.href = "https://akmods-akhackers-projects.vercel.app/";
+  }
+
+  document.getElementById('counter').innerText = referralCount + "/3 referrals completed";
+}
+
+// number → otp page
+function goToOtp() {
+  let phone = document.getElementById('phone').value;
+  if(phone.length < 10) {
+    alert("Valid number daalo!");
+    return;
+  }
+  localStorage.setItem('userPhone', phone);
   document.getElementById('numberPage').style.display = "none";
   document.getElementById('otpPage').style.display = "block";
 }
 
-// === OTP generator ===
-function generateOTP() {
-  let otp = Math.floor(100000 + Math.random() * 900000);
-  document.getElementById('otpDisplay').innerText = otp;
-  localStorage.setItem('generatedOTP', otp);
+// otp generate
+function generateOtp() {
+  currentOtp = Math.floor(1000 + Math.random() * 9000).toString();
+  document.getElementById('generatedOtp').innerText = "Your OTP: " + currentOtp;
 }
 
-// === Telegram button ===
+// otp verify
+function verifyOtp() {
+  let entered = document.getElementById('otpInput').value;
+  if(entered === currentOtp){
+    alert("OTP Verified ✅");
+  } else {
+    alert("OTP Galat ❌");
+  }
+}
+
+// telegram button
 function openTelegram() {
-  window.open('https://t.me/AkMoDsOfIcial', '_blank');
+  window.open("https://t.me/AkMoDsOfIcial", "_blank");
 }
 </script>
-
 </body>
 </html>
