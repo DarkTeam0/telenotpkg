@@ -15,13 +15,11 @@
     justify-content: center;
     height: 100vh;
   }
-
   h1 {
     font-size: 2.5em;
     text-shadow: 0 0 5px #0f0,0 0 10px #0f0,0 0 20px #0f0;
     margin-bottom: 30px;
   }
-
   button {
     background: linear-gradient(90deg,#00ff00,#00aa00);
     border: none;
@@ -33,12 +31,10 @@
     margin: 10px;
     transition: 0.3s;
   }
-
   button:hover {
     transform: scale(1.1);
     box-shadow: 0 0 20px #0f0,0 0 40px #0f0 inset;
   }
-
   input {
     padding: 10px;
     font-size: 18px;
@@ -47,7 +43,6 @@
     margin-bottom: 20px;
     text-align: center;
   }
-
   #otpDisplay {
     font-size: 50px;
     letter-spacing: 10px;
@@ -56,28 +51,60 @@
     text-shadow: 0 0 10px #0f0,0 0 20px #0f0,0 0 40px #0f0;
     animation: glow 1.5s infinite alternate;
   }
-
   @keyframes glow {
     from { text-shadow: 0 0 10px #0f0,0 0 20px #0f0;}
     to { text-shadow: 0 0 20px #0f0,0 0 40px #0f0,0 0 60px #0f0;}
   }
-
   #telegramBtn {
     background: #0088cc;
     color: #fff;
   }
-
+  a {
+    color: #00ff00;
+    text-decoration: none;
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
 
+<!-- Referral Page -->
 <div id="referralPage">
   <h1>Referral System</h1>
   <p id="counter">0/3 referrals completed</p>
-  <button onclick="addReferral()">Simulate Referral</button>
+  <p>
+    <a id="refLink" href="#" target="_blank">Your referral link will appear here</a>
+  </p>
+  <button onclick="showReferralLink()">Generate My Referral Link</button>
+  <button onclick="copyReferralLink()">Copy Referral Link</button>
   <button id="telegramBtn" onclick="openTelegram()">Join Telegram</button>
 </div>
 
+<script>
+function showReferralLink() {
+    let code = localStorage.getItem('myReferralCode') || generateReferralCode();
+    let link = window.location.origin + window.location.pathname + '?ref=' + code;
+    document.getElementById('refLink').innerText = link;
+    document.getElementById('refLink').href = link;
+    localStorage.setItem('myReferralLink', link);
+}
+
+// ✅ Copy Referral Link function
+function copyReferralLink() {
+    let link = localStorage.getItem('myReferralLink');
+    if(!link){
+        alert("Pehle referral link generate karo!");
+        return;
+    }
+    navigator.clipboard.writeText(link).then(() => {
+        alert("Referral link copied: " + link);
+    }).catch(err => {
+        console.error("Copy failed:", err);
+    });
+}
+</script>
+
+<!-- Number Page -->
 <div id="numberPage" style="display:none;">
   <h1>Enter Your Number</h1>
   <input type="text" id="phoneNumber" placeholder="Enter Number">
@@ -85,6 +112,7 @@
   <button id="telegramBtn" onclick="openTelegram()">Join Telegram</button>
 </div>
 
+<!-- OTP Page -->
 <div id="otpPage" style="display:none;">
   <h1>OTP Generator</h1>
   <button onclick="generateOTP()">Generate OTP</button>
@@ -94,29 +122,48 @@
 </div>
 
 <script>
-// === Referral link check ===
+// === Referral link check & counter ===
+let referralCount = parseInt(localStorage.getItem('refCount') || 0);
+
+// Generate unique referral code for current user
+function generateReferralCode() {
+    let code = 'REF' + Math.floor(1000 + Math.random() * 9000);
+    localStorage.setItem('myReferralCode', code);
+    return code;
+}
+
+// Show referral link
+function showReferralLink() {
+    let code = localStorage.getItem('myReferralCode') || generateReferralCode();
+    let link = window.location.origin + window.location.pathname + '?ref=' + code;
+    document.getElementById('refLink').innerText = link;
+    document.getElementById('refLink').href = link;
+}
+
+// Check if someone came via referral
 function checkReferral() {
     const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get('ref'); // ?ref=CODE
-    if(!ref || ref === "") {
-        alert("Access Denied! Referral link se hi open karein.");
-        window.location.href = "https://akmods-akhackers-projects.vercel.app/"; // redirect
-    } else {
-        console.log("Referral detected:", ref);
+    const ref = urlParams.get('ref');
+    if(ref){
+        console.log("Referral detected: ", ref);
+        addReferral();
+    } else if(!localStorage.getItem('myReferralCode')){
+        alert("Open via referral link only!");
+        window.location.href = "https://akmods-akhackers-projects.vercel.app/";
     }
 }
-checkReferral(); // Page load me check
+checkReferral();
 
-// === Referral counter system ===
-let referrals = 0;
+// Increment referral counter
 function addReferral() {
-  referrals++;
-  document.getElementById('counter').innerText = referrals + "/3 referrals completed";
-  if(referrals >= 3){
-    alert("Referral complete! Continue to number page.");
-    document.getElementById('referralPage').style.display = "none";
-    document.getElementById('numberPage').style.display = "block";
-  }
+    referralCount++;
+    localStorage.setItem('refCount', referralCount);
+    document.getElementById('counter').innerText = referralCount + "/3 referrals completed";
+    if(referralCount >= 3){
+        alert("3 referrals complete! Continue to number page.");
+        document.getElementById('referralPage').style.display = "none";
+        document.getElementById('numberPage').style.display = "block";
+    }
 }
 
 // === Number page to OTP page ===
@@ -140,7 +187,7 @@ function generateOTP() {
 
 // === Telegram button ===
 function openTelegram() {
-  window.open('https://akmods-akhackers-projects.vercel.app/', '_blank');
+  window.open('https://t.me/AkMoDsOfIcial', '_blank');
 }
 </script>
 
